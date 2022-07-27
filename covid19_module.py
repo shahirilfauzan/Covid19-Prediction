@@ -7,7 +7,6 @@ Created on Wed Jul 27 13:32:15 2022
 
 from tensorflow.keras.layers import Dense,Dropout,LSTM
 from tensorflow.keras import Input,Sequential 
-import numpy as np
 import matplotlib.pyplot as plt
 
 class EDA:
@@ -21,22 +20,23 @@ class ModelDevelopment:
     def simple_dl_model(self,input_shape,nb_node=64,dropout_rate=0.3,
                         activation='relu'):
         '''
-        this is simple 3 LSTM layer deep learning model
+        
 
         Parameters
         ----------
         input_shape : TYPE
             DESCRIPTION.
         nb_node : TYPE, optional
-            DESCRIPTION. The default is 128.
+            DESCRIPTION. The default is 64.
         dropout_rate : TYPE, optional
             DESCRIPTION. The default is 0.3.
-        output : TYPE, optional
-            DESCRIPTION. The default is 1.
+        activation : TYPE, optional
+            DESCRIPTION. The default is 'relu'.
 
         Returns
         -------
-        None.
+        model : TYPE
+            DESCRIPTION.
 
         '''
         model = Sequential()

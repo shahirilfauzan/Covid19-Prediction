@@ -18,21 +18,19 @@ import datetime
 import pickle
 import os
 #%% Constant
-CSV_PATH_TRAIN = os.path.join(os.getcwd(),'dataset',
-                              'cases_malaysia_train.csv')
+CSV_PATH_TRAIN=os.path.join(os.getcwd(),'dataset','cases_malaysia_train.csv')
 
-CSV_PATH_TEST = os.path.join(os.getcwd(),'dataset',
-                              'cases_malaysia_test.csv')
+CSV_PATH_TEST=os.path.join(os.getcwd(),'dataset','cases_malaysia_test.csv')
 
-MMS_PATH = os.path.join(os.getcwd(), 'model', 'mms_train.pkl')
+MMS_PATH=os.path.join(os.getcwd(),'model','mms_train.pkl')
 
-LOGS_PATH = os.path.join(os.getcwd(),'logs',datetime.datetime.now().
-                         strftime('%Y%m%d-%H%M%S'))
+LOGS_PATH=os.path.join(os.getcwd(),'logs',datetime.datetime.now().
+                       strftime('%Y%m%d-%H%M%S'))
 
-BEST_MODEL_PATH = os.path.join(os.getcwd(), 'model', 'best_model.h5')
+BEST_MODEL_PATH=os.path.join(os.getcwd(),'model','best_model.h5')
 #%%STEP 1) Data Loading
-df = pd.read_csv(CSV_PATH_TRAIN,na_values=[' ','?'])
-df_test = pd.read_csv(CSV_PATH_TEST,na_values=[' ','?'])    
+df=pd.read_csv(CSV_PATH_TRAIN,na_values=[' ','?'])
+df_test=pd.read_csv(CSV_PATH_TEST,na_values=[' ','?'])    
 #%%STEP 2)Data Inspection
 
 #train
@@ -81,49 +79,49 @@ eda.plot_trend(df_test.cases_new,win_start=98,win_stop=650)
 #%%STEP 5) Data Preprocessing
 
 #TRAIN DATASET
-X = df['cases_new']#only 1 feature
+X=df['cases_new']#only 1 feature
 
-mms = MinMaxScaler()
-X = mms.fit_transform(np.expand_dims(X,axis=-1))
+mms=MinMaxScaler()
+X=mms.fit_transform(np.expand_dims(X,axis=-1))
 
-with open(MMS_PATH, 'wb') as file:
-    pickle.dump(mms, file)
+with open(MMS_PATH,'wb') as file:
+    pickle.dump(mms,file)
 
-win_size = 30
-X_train = []
-y_train = []
+win_size=30
+X_train=[]
+y_train=[]
 
 for i in range(win_size,len(X)): 
     X_train.append(X[i-win_size:i]) 
     y_train.append(X[i])
 
-X_train = np.array(X_train)
-y_train = np.array(y_train)
+X_train=np.array(X_train)
+y_train=np.array(y_train)
 
 
 #%%Test dataset
 
-dataset_cat = pd.concat((df['cases_new'],df_test['cases_new']))
+dataset_cat=pd.concat((df['cases_new'],df_test['cases_new']))
 
 #concat
-length_days = win_size + len(df_test)
-tot_input = dataset_cat[-length_days:]
+length_days=win_size + len(df_test)
+tot_input=dataset_cat[-length_days:]
 
-Xtest = mms.transform(np.expand_dims(tot_input, axis=-1)) 
+Xtest=mms.transform(np.expand_dims(tot_input, axis=-1)) 
 
-X_test = []
-y_test = []
+X_test=[]
+y_test=[]
 
 for i in range(win_size,len(Xtest)):
     X_test.append(Xtest[i-win_size:i])
     y_test.append(Xtest[i])
 
-X_test = np.array(X_test)
-y_test = np.array(y_test)
+X_test=np.array(X_test)
+y_test=np.array(y_test)
 
 #%% Model development
 
-input_shape = np.shape(X_train)[1:]
+input_shape=np.shape(X_train)[1:]
 
 md=ModelDevelopment()
 
@@ -132,22 +130,22 @@ model=md.simple_dl_model(input_shape,nb_node=64,dropout_rate=0.3,
 
 plot_model(model,show_shapes=True,show_layer_names=True)
 
-#%%
+#%%Model Compilation
 model.compile(optimizer='adam',loss='mse',
               metrics=['mean_absolute_percentage_error','mse'])
 
 #callbacks
-tensorboard_callback = TensorBoard(log_dir=LOGS_PATH,histogram_freq=1)
+tensorboard_callback=TensorBoard(log_dir=LOGS_PATH,histogram_freq=1)
 
 # ModelCheckpoint # To get the best model
-mdc = ModelCheckpoint(BEST_MODEL_PATH,
-                      monitor='val_mean_absolute_percentage_error',
-                      save_best_only=True,
-                      mode='min',
-                      verbose=1)
+mdc=ModelCheckpoint(BEST_MODEL_PATH,
+                    monitor='val_mean_absolute_percentage_error',
+                    save_best_only=True,
+                    mode='min',
+                    verbose=1)
 
 #%% Model Training
-hist = model.fit(X_train,y_train,
+hist=model.fit(X_train,y_train,
                  epochs=300,
                  callbacks=[tensorboard_callback,mdc],
                  validation_data=(X_test,y_test))
@@ -159,8 +157,8 @@ predicted_stock_price=model.predict(X_test)
 actual_price=mms.inverse_transform(y_test)
 predicted_price=mms.inverse_transform(predicted_stock_price)
 
-pf = PlotFigure()
-plot_fig = pf.plot_fig(y_test,predicted_stock_price,predicted_price,
+pf=PlotFigure()
+plot_fig=pf.plot_fig(y_test,predicted_stock_price,predicted_price,
              actual_price)
 
 
@@ -178,17 +176,17 @@ plot_hist_mape=me.plot_hist_graph(hist,key,1,4)
 
 #plot figure
 y_pred=model.predict(X_test)
-actual_cases = mms.inverse_transform(y_test)
-predicted_cases = mms.inverse_transform(y_pred)
+actual_cases=mms.inverse_transform(y_test)
+predicted_cases=mms.inverse_transform(y_pred)
 
-pf = PlotFigure()
+pf=PlotFigure()
 
-plot_fig = pf.plot_fig(y_test,y_pred,actual_cases,predicted_cases)
+plot_fig=pf.plot_fig(y_test,y_pred,actual_cases,predicted_cases)
 #%% MAE,MSE and MAPE
 
-mae = mean_absolute_error(y_test, y_pred)
-mse = mean_squared_error(y_test, y_pred)
-mape = mean_absolute_percentage_error(y_test, y_pred)
+mae=mean_absolute_error(y_test,y_pred)
+mse=mean_squared_error(y_test,y_pred)
+mape=mean_absolute_percentage_error(y_test,y_pred)
 
 print('mae :', mae)
 print('mse :', mse)
